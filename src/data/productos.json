@@ -25,5 +25,19 @@
         "thumbnail": "https://img1.com",
         "code": "s23hg8",
         "stock": 20
+    },
+    {
+        "id": 8,
+        "title": "Titulo 3",
+        "description": "lenovo 12",
+        "price": 234,
+        "thumbnails": [
+            "https://img1.com",
+            "https://img2.com"
+        ],
+        "code": "code12345",
+        "stock": 24,
+        "category": "Alimenticios",
+        "status": true
     }
 ]

@@ -7,7 +7,7 @@ class ProductManager {
     static idProducto = 0;
 
     constructor() {
-        this.#path = path.resolve('src', 'data', 'productos.json') //'./data/productos.json';
+        this.#path = path.resolve('src', 'data', 'productos.json')
         this.#products = this.#leerProductosInFile();
     }
 
@@ -40,69 +40,96 @@ class ProductManager {
         }
     }
 
-    addProduct(title, description, price, thumbnails=[], code, stock, category, status = true) {
+    addProduct(title, description, price, thumbnails = [], code, stock, category, status = true) {
 
         let result = 'Ocurrio un error'
 
         if (!title || !description || !price || !code || !stock || !category)
             result = 'Todos los parametros son requeridos [title, description, price, code, stock, category]'
         else {
-        const codeRepetido = this.#products.some(p => p.code == code);
-        if (codeRepetido)
-            result = `El codigo ${code} ya se encuentra registrado en otro producto`
+            const codigoRepetido = this.#products.some(p => p.code == code);
+            if (codigoRepetido)
+                result = `El codigo ${code} ya se encuentra registrado en otro producto`
+            else {
+                ProductManager.idProducto = ProductManager.idProducto + 1;
+                const id = this.#asignarIdProducto()
 
-        ProductManager.idProducto = ProductManager.idProducto + 1;
-        const id = this.#asignarIdProducto()
-
-        const nuevoProducto = {
-            id,
-            title,
-            description,
-            price,
-            thumbnails,
-            code,
-            stock,
-            category,
-            status
-        }
-        this.#products.push(nuevoProducto)
-        this.#guardarArchivo()
-        result = {
-            msg: 'Producto agregado exitosamente!',
-            producto: nuevoProducto
+                const nuevoProducto = {
+                    id,
+                    title,
+                    description,
+                    price,
+                    thumbnails,
+                    code,
+                    stock,
+                    category,
+                    status
+                }
+                this.#products.push(nuevoProducto)
+                this.#guardarArchivo()
+                result = {
+                    msg: 'Producto agregado exitosamente!',
+                    producto: nuevoProducto
+                }
             }
         }
-
-        return 'Producto agregado exitosamente!'
+        return result
     }
 
     getProducts(limit = 0) {
         limit = Number(limit)
         if (limit > 0)
-            return this.#products.slice(0,limit)
+            return this.#products.slice(0, limit)
         return this.#products
     }
 
     getProductById(id) {
+        let status = false
+        let resp = `El producto con id ${id} no existe!!!!`
+
         const producto = this.#products.find(p => p.id == id)
-        if (producto)
-            return producto
-        else
-            return `Not Found del producto con id ${id}`
+        if (producto) {
+            status = true
+            resp = producto
+        }
+
+        return { status, resp }
     }
 
     updateProduct(id, objetUpdate) {
-        let msg = `El producto con id ${id} no existe`
+        let result = `El producto con id ${id} no existe`
 
         const index = this.#products.findIndex(p => p.id === id)
 
         if (index !== -1) {
             const { id, ...rest } = objetUpdate
-            this.#products[index] = { ...this.#products[index], ...rest }
+            const propiedadesPermitidas = ['title', 'description', 'price', 'thumbnails', 'code', 'stock', 'category', 'status']
+            const propiedadesActualizadas = Object.keys(rest)
+                .filter(propiedad => propiedadesPermitidas.includes(propiedad))
+                .reduce((obj, key) => {
+                    obj[key] = rest[key]
+                    return obj
+                }, {})
+            this.#products[index] = { ...this.#products[index], ...propiedadesActualizadas }
             this.#guardarArchivo()
-            msg = 'Producto actualizado!'
+            result = {
+                msg: 'Producto actualizado!',
+                producto: this.#products[index]
+            }
         }
 
+        return result
+    }
+
+    deleteProduct(id) {
+        let msg = `El producto ${id} no existe`
+
+        const index = this.#products.findIndex(p => p.id === id)
+        if (index !== -1) {
+            this.#products = this.#products.filter(p => p.id !== id)
+            this.#guardarArchivo()
+            msg = 'Producto eliminado!'
+        }
         return msg
     }
 }

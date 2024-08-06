@@ -1,6 +1,6 @@
 import express from 'express'
-import products from './routers/products.js'
-import carts from './routers/carts.js'
+import productsRouter from './routers/products.js'
+import cartsRouter from './routers/carts.js'
 
 const app = express();
 const PORT = 8080
@@ -12,8 +12,8 @@ app.get('/', (req, res) => {
     return res.send('hola mundo')
 })
 
-app.use('/api/products', products)
-app.use('/api/carts', carts)
+app.use('/api/products', productsRouter)
+app.use('/api/carts', cartsRouter)
 
 app.listen(PORT, () => {
     console.log('este es el app.listen');
