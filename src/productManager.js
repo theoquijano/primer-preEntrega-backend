@@ -4,7 +4,6 @@ import path from 'path';
 class ProductManager {
     #products;
     #path;
-    static idProducto = 0;
 
     constructor() {
         this.#path = path.resolve('src', 'data', 'productos.json')
@@ -40,7 +39,7 @@ class ProductManager {
         }
     }
 
-    addProduct(title, description, price, thumbnails = [], code, stock, category, status = true) {
+    addProduct({ title, description, price, thumbnails = [], code, stock, category, status = true }) {
 
         let result = 'Ocurrio un error'
 
@@ -51,7 +50,6 @@ class ProductManager {
             if (codigoRepetido)
                 result = `El codigo ${code} ya se encuentra registrado en otro producto`
             else {
-                ProductManager.idProducto = ProductManager.idProducto + 1;
                 const id = this.#asignarIdProducto()
 
                 const nuevoProducto = {
