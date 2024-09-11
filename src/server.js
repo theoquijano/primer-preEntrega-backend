@@ -1,18 +1,20 @@
 import express from 'express'
 import { Server } from 'socket.io'
 import { engine } from 'express-handlebars'
+import 'dotenv/config'
 
 import productsRouter from './routers/products.js'
 import cartsRouter from './routers/carts.js'
 import viewsRouter from './routers/views.js'
 import __dirname from './utils.js'
-import ProductManager from './productManager.js'
+import { dbConnection } from './database/config.js'
+import { messageModel } from './models/messages.js'
+import { addProductService, getProductsService } from './services/products.js'
 
 
 const app = express();
-const PORT = 8080
+const PORT = process.env.PORT
 
-const p = new ProductManager()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -27,20 +29,37 @@ app.use('/', viewsRouter)
 app.use('/api/products', productsRouter)
 app.use('/api/carts', cartsRouter)
 
+await dbConnection()
+
 const expressServer = app.listen(PORT, () => {
     console.log('este es el app.listen!!');
 })
 
-const socketServer = new Server(expressServer)
+const io = new Server(expressServer)
 
-socketServer.on('connection', socket => {
+io.on('connection', async (socket) => {
 
-    const productos = p.getProducts()
-    socket.emit('productos', productos)
-
-    socket.on('agregarProducto', producto => {
-        const result = p.addProduct({ ...producto })
-        if (result.producto)
-            socket.emit('productos', result.producto)
+    const { payload } = await getProductsService({})
+    const productos = payload
+    socket.emit('productos', payload)
+    socket.on('agregarProducto', async (producto) => {
+        const newProduct = await addProductService({ ...producto })
+        if (newProduct) {
+            productos.push(newProduct)
+            socket.emit('productos', productos)
+        }
     })
+
+    const messages = await messageModel.find()
+    socket.emit('message', messages)
+
+    socket.on('message', async (data) => {
+        const newMessage = await messageModel.create({ ...data })
+        if (newMessage) {
+            const messages = await messageModel.find()
+            io.emit('messageLogs', messages)
+        }
+    })
+
+    socket.broadcast.emit('nuevo_user')
 })
