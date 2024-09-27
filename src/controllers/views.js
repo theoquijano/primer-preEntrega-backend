@@ -54,7 +54,6 @@ export const registerPost = async (req = request, res = response) => {
         const userName = `${user.name} ${user.lastName}`
         req.session.user = userName
         req.session.rol = user.rol
-        console.log('user creado');
         return res.redirect('/')
     }
 
