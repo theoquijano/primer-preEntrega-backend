@@ -4,7 +4,7 @@ const nameCollection = 'user'
 
 const UserSchema = new Schema({
     name: { type: String, required: [true, 'El nombre es obligatorio'] },
-    lastName: { type: String, required: [true, 'El apellido es obligatorio'] },
+    lastName: { type: String, },
     email: { type: String, required: [true, 'El correo es obligatorio'], unique: true },
     password: { type: String, required: [true, 'El contraseña es obligatorio'] },
     rol: { type: String, default: 'user', enum: ['user', 'admin'] },
